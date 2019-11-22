@@ -1,0 +1,247 @@
+<div id="details_root" style="background: white;" data-steps="#steps#" data-recipeid="#recipe_id#">
+    <div style="height: 200px;">
+        <img id="recipe_img" style="object-fit: cover; height: 100%; width: 100%;" src="#recipe_img#"/>
+        <div class="test" style="position: relative; top: -200px; width: 100%; height: 200px; background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.8));">
+            <img id="user_img" src="#user_img_url#" data-userid="#user_id#" onclick="goToProfileDetails(this)"/>
+            <div style="bottom: 0px; position: absolute; width: 100%;">
+                <table id="rating_table">
+                    <tr>
+                        <td>
+                            <span class="recipe_details_rating" data-rating="#recipe_rating#">
+                        </td>
+                        <td style="color: white;">.</td>
+                        <td><img src="../../resources/ic_timer.png"/></td>
+                        <td style="color: white;">#recipe_duration#'</td>
+                    </tr>
+                </table>
+                <p id="recipe_details_name"><b>#recipe_name#</b></p>
+                <div>
+                    <table class="values-table" border="0">
+                        <tr>
+                            <td>
+                                <span class="value-span" id="ingredients-count"></span><span class="value-label-span">Ingredients</span>
+                            </td>
+                            <td>
+                                <span class="value-span">#recipe_calories#</span><span class="value-label-span">Calories</span>
+                            </td>
+                            <td>
+                                <span class="value-span">#recipe_servings#</span><span class="value-label-span">Servings</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin: 0.9em;">
+        <b class="section-title">About</b>
+        <p style="font-size: 0.6em; text-align: justify; text-justify: distribute;">#recipe_dsc#</p>
+        
+        <div>
+            <div style="float: right; height: 1em; width: 1em;"><img onclick="addIngredients()" src="../../resources/ic_add.png"/></div>
+            <div><b class="section-title">Ingredients</b></div>
+        </div>
+        <div>
+            <table id="ingredients-container" style="margin-top: 0.5em; margin-left: 1em;"></table>
+        </div>
+        <b class="section-title">Steps</b>
+        <div style="overflow-y: hidden;">
+            <table id="steps-container" style="margin-top: 1em;"></table>
+        </div>
+    </div>
+
+
+    <style>
+        .section-title {
+            margin-top: 1.5em;
+            margin-bottom: 1.5em;
+            margin-left: 0.7em;
+            margin-right: 0.7em;
+            font-size: 0.8em;
+        }
+
+        #user_img {
+            width: 3.3em;
+            height: 3.3em;
+            margin-left: 1em;
+            margin-top: 0.5em;
+            border-radius: 50%;
+            border: 2px solid white;
+            object-fit: cover;
+        }
+
+        .value-label-span {
+            color: white;
+            font-size: 0.5em;
+        }
+
+        #recipe_details_img {
+            width: 100%;
+            height: 15em;
+            object-fit: cover;
+        }
+
+        #recipe_details_name {
+            color: white;
+            font-size: 1.1em;
+            margin-left: 0.9em;
+            padding-right: 0.9em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #recipe_details_name:active {
+            white-space: normal;
+            overflow: scroll;
+            text-overflow: unset;
+            font-size: 0.9em;
+        }
+
+        #rating_table {
+            margin-left: 1em;
+        }
+
+        .values-table {
+            border-collapse:separate;
+            border-spacing: 1em 0em;
+        }
+
+        .value-span {
+            color: white;
+            font-weight: bold;
+            margin-right: 0.2em;
+        }
+    </style>
+
+    <script>
+        var ingredients = []
+        var recipeId = 0
+
+        function addRecipeToFavoriteIndex() {
+            $.ajax({
+                url: RECIPES_URL + recipeId
+            }).done(function(recipe) {
+                favortiItem = localStorage.getItem("favorite")
+                if(!favortiItem) {
+                    favortiItem = "{}"
+                }
+                favoriteJson = JSON.parse(favortiItem.replace(/'/g, '"').replace(/~/g, "'"))
+                favoriteJson[recipeId] = recipe
+
+                var favoriteString = JSON.stringify(favoriteJson);
+                favoriteString = favoriteString.replace(/'/g, "~").replace(/"/g, "'");
+
+                localStorage.removeItem("favorite")
+                localStorage.setItem("favorite", favoriteString)
+
+                $("#index_favorite_outline").hide()
+                $("#index_favorite_full").show()
+            })
+        }
+
+        function removeRecipeFromFavoriteIndex(){
+            favortiItem = localStorage.getItem("favorite")
+            if(!favortiItem) {
+                favortiItem = "{}"
+            }
+            favoriteJson = JSON.parse(favortiItem.replace(/'/g, '"').replace(/~/g, "'"))
+            delete favoriteJson[recipeId]
+
+            var favoriteString = JSON.stringify(favoriteJson);
+            favoriteString = favoriteString.replace(/'/g, "~").replace(/"/g, "'");
+            localStorage.removeItem("favorite")
+            localStorage.setItem("favorite", favoriteString)
+
+            $("#index_favorite_outline").show()
+            $("#index_favorite_full").hide()
+        }
+
+        function goToProfileDetails(view) {
+            navigateToProfile($(view).data('userid'))
+        }
+
+        function addIngredients() {
+            shoppingListJsonString = localStorage.getItem("shop")
+            if(!shoppingListJsonString) {
+                shoppingListJsonString = "{}"
+                localStorage.setItem("shop", shoppingListJsonString)
+            }
+            const shoppingListJson = JSON.parse(shoppingListJsonString.replace(/'/g, '"').replace(/~/g, "'"))
+            if(shoppingListJson.hasOwnProperty(recipeId)){
+                alert('Recipe already in the shopping list.')
+            }else {
+                shoppingListJson[recipeId] = {
+                    name: $('#recipe_details_name > b').text(),
+                    image_url: $('#recipe_img').attr("src"),
+                    ingredients: ingredients
+                }
+                localStorage.removeItem('shop')
+                var newShopJsonString = JSON.stringify(shoppingListJson);
+                newShopJsonString = newShopJsonString.replace(/'/g, "~").replace(/"/g, "'");
+                localStorage.setItem('shop', newShopJsonString)
+                alert("Ingredients added to the shopping list.")
+            }
+        }
+
+        function checkFavorite() {
+            favortiItem = localStorage.getItem("favorite")
+            if(!favortiItem) {
+                favortiItem = "{}"
+            }
+            favoriteJson = JSON.parse(favortiItem.replace(/'/g, '"').replace(/~/g, "'"))
+            if(favoriteJson.hasOwnProperty(recipeId)) {
+                $("#index_favorite_outline").hide()
+                $("#index_favorite_full").show()
+            } else {
+                $("#index_favorite_outline").show()
+                $("#index_favorite_full").hide()
+            }
+        }
+
+        $(function() {
+            recipeId = $("#details_root").data("recipeid")
+
+            checkFavorite()
+
+            $(".recipe_details_rating").starRating({
+                totalStars: 5,
+                starSize: 20,
+                emptyColor: 'lightgray',
+                hoverColor: 'salmon',
+                activeColor: 'crimson',
+                useGradient: false,
+                readOnly: true
+            });
+            const steps = JSON.parse($("#details_root").data("steps").replace(/'/g, '"').replace(/~/g, "'"))
+            $.get("../views/components/step_item.html", function(step_html_string) {
+                stepsContainer = $("#steps-container")
+                stepsContainer.html("")
+                
+                $.each(steps, function(i, step) {
+                    ingredients = ingredients.concat(step.ingredients)
+                    var stepHtmlCopy = String(step_html_string);
+                    stepHtmlCopy = stepHtmlCopy.replace("#step_dsc#", step.description)
+                    if(step.time != 0) {
+                        stepHtmlCopy = stepHtmlCopy.replace("#step_duration#", step.time + "'")
+                    }else {
+                        stepHtmlCopy = stepHtmlCopy.replace("#step_duration#", "")
+                    }
+                    stepsContainer.append(stepHtmlCopy);
+                })
+                $('#ingredients-count').html(ingredients.length)
+                $.get("../views/components/ingredient_item.html", function(ingredient_html_string) {
+                    ingredientsContainer = $("#ingredients-container")
+                    ingredientsContainer.html("")
+                    $.each(ingredients, function(i, ingredient) {
+                        var ingredientHtmlCopy = String(ingredient_html_string);
+                        ingredientHtmlCopy = ingredientHtmlCopy.replace("#ingredient_quantity#", ingredient.quantity).replace("#ingredient_unit#", ingredient.unit)
+                            .replace("#ingredient_name#", ingredient.name)
+                        ingredientsContainer.append(ingredientHtmlCopy);
+                    })
+                });
+            });
+        })
+    </script>
+</div>

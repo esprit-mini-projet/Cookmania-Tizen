@@ -1,0 +1,142 @@
+<div data-userid="#profile_userid#" id="profile-root">
+    <div style="height: 6em; z-index: 0;">
+        <img id="profile_recipe_img" style="object-fit: cover; height: 100%; width: 100%;"/>
+        <div class="test" style="position: relative; top: -100%; width: 100%; height: 100%; background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.8));"></div>
+    </div>
+    <img id="profile_user_img"/>
+    <p id="profile_user_name"></p>
+
+    <div class="profile-tabs tabs is-centered" style="width: 100%; margin-top: 2em;">
+        <ul>
+            <li class="is-active">
+                <a data-index="0">
+                    Recipes
+                </a>
+            </li>
+            <li id="favorite-tab">
+                <a data-index="1">
+                    Favorites
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div id="tabs-container">
+
+    </div>
+
+    <script>
+        $(function() {
+            userid = $('#profile-root').data("userid")
+
+            if(userid != connectedUserId) {
+                $('#favorite-tab').hide()
+            }
+
+            $(".profile-tabs a").click(function() {
+                $("li.is-active").removeClass();
+                var parent = $(this).parent();
+                parent.removeClass();
+                parent.addClass('is-active');
+                index = $(this).data("index")
+                if(index == 0) {
+                    loadRecipes()
+                } else {
+                    loadFavorites()
+                }
+            })
+
+            $.ajax({
+                url: USERS_URL + userid
+            }).done(function(user) {
+                $("#profile_user_name").text(user.username)
+                $('#profile_user_img').attr("src", user.image_url)
+            })
+
+            loadRecipes()
+        })
+
+        function loadRecipes() {
+            userId = $('#profile-root').data("userid")
+            $.ajax({
+                url: GET_USER_RECIPES + userId
+            }).done(function(recipes) {
+                var container = $('#tabs-container');
+		        container.html("");
+                if(!recipes || recipes.length == 0) {
+                    container.html('<p style="color: lightslategray; font-size: 0.7em; width: 100%; text-align: center;" id="empty_msg">No recipe found.</p>');
+                    
+                    $('#profile_recipe_img').attr("src", "../../resources/bg_placeholder.png")
+                    return;
+                }
+                $('#profile_recipe_img').attr("src", IMAGES_URL + (recipes[recipes.length - 1]).image_url)
+                $.get("../views/components/more_recipe_item.html", function(html_string) {	
+                    $.each(recipes, function(i, recipe) {
+                        var topAppendString = String(html_string);
+                        topAppendString = topAppendString.replace("#more_recipe_img#", IMAGES_URL + recipe.image_url).replace("#more_recipe_name#", recipe.name)
+                            .replace("#recipe_rating#", recipe.rating).replace("#recipe_calories#", recipe.calories).replace("#recipe_servings#", recipe.servings)
+                            .replace("#recipe_id#", recipe.id)
+                        container.append(topAppendString);
+                    })
+                },'html');
+            })
+        }
+
+        function loadFavorites() {
+            favortiItem = localStorage.getItem("favorite")
+            if(!favortiItem) {
+                favortiItem = "{}"
+            }
+            favoriteJson = JSON.parse(favortiItem.replace(/'/g, '"').replace(/~/g, "'"))
+            var container = $('#tabs-container');
+            container.html("");
+            if($.isEmptyObject(favoriteJson)) {
+                container.html('<p style="color: lightslategray; font-size: 0.7em; width: 100%; text-align: center;" id="empty_msg">No favorite recipe found.</p>');
+                return;
+            }else {
+                $.get("../views/components/more_recipe_item.html", function(html_string) {	
+                    $.each(favoriteJson, function(i, recipe) {
+                        var topAppendString = String(html_string);
+                        topAppendString = topAppendString.replace("#more_recipe_img#", IMAGES_URL + recipe.image_url).replace("#more_recipe_name#", recipe.name)
+                            .replace("#recipe_rating#", recipe.rating).replace("#recipe_calories#", recipe.calories).replace("#recipe_servings#", recipe.servings)
+                            .replace("#recipe_id#", recipe.id)
+                        container.append(topAppendString);
+                    })
+                },'html');
+            }
+        }
+    </script>
+
+    <style>
+        
+        .profile-tabs {
+            padding: 0px !important;
+            margin: 0px !important;
+        }
+
+        .profile-tabs .is-active {
+            color: #e32929;
+        }
+
+        #profile_user_name {
+            color: black;
+            font-weight: bold;
+            margin-left: 6.5em;
+            font-size: 0.9em;
+            margin-top: -2em;
+        }
+
+        #profile_user_img {
+            position: relative;
+            width: 4em;
+            height: 4em;
+            z-index: 9999;
+            top: 0em;
+            margin-top: -2em;
+            margin-left: 1.5em;
+            border-radius: 50%;
+            border: 2px solid white;
+            object-fit: cover;
+        }
+    
+    </style>
+</div>

@@ -1,0 +1,54 @@
+<div id="hr-root-#category_id#" data-recipes="#data#">
+
+    <table style="width: 100%; margin-top: 10px;">
+        <tr>
+            <td>
+                <b class="category-title">#category_title#</b>
+            </td>
+            <td style="text-align: end;">
+                <b class="category-title more" style="color: dodgerblue;" data-destination="#category_id#" onclick="toCategoryMore(this)">More</b>
+            </td>
+        </tr>
+    </table>
+    <div class="scrolling-wrapper" id="#category_id#">
+    </div>
+
+    <style>
+        .category-title {
+            margin-top: 1.5em;
+            margin-left: 0.7em;
+            margin-right: 0.7em;
+            font-size: 0.8em;
+            color: #e32929;
+        }
+
+        .scrolling-wrapper {
+            overflow-x: scroll;
+            overflow-y: hidden;
+            white-space: nowrap;
+            padding-right: 1em;
+            padding-left: 0.5em;
+        }
+    </style>
+
+    <script>
+        $(function() {
+            const data = JSON.parse($("#hr-root-#category_id#").attr("data-recipes").replace(/'/g, '"').replace(/~/g, "'"))
+            const container = $('##category_id#');
+            $.get("../views/components/recipe_card.html", function(html_string) {
+                $.each(data, function(i, recipe) {
+                    var htmlCopy = String(html_string);
+                    htmlCopy = htmlCopy.replace("#img_src#", IMAGES_URL + recipe.image_url).replace("#recipe_name#", recipe.name)
+                        .replace("#recipe_rating#", recipe.rating).replace("#recipe_id#", recipe.id)
+                    container.append(htmlCopy);
+                });
+            },'html');
+        })
+
+        function toCategoryMore(instance) {
+            selectedCategory = $(instance).attr("data-destination");
+            navigateToCategory(selectedCategory);
+        }
+    </script>
+
+</div>

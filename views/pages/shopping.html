@@ -1,0 +1,34 @@
+<div>
+	<p style="color: lightslategray; font-size: 0.7em; width: 100%; text-align: center;" id="empty_msg">Shopping list empty</p>
+	<table id="shopping_table">
+
+	</table>
+
+	<script>
+		$(loadShoppingList())
+
+		function loadShoppingList() {
+			recipiesString = localStorage.getItem('shop')
+			shoppingTable = $("#shopping_table")
+			if(recipiesString) {
+				recipies = JSON.parse(recipiesString.replace(/'/g, '"').replace(/~/g, "'"))
+				shoppingTable.html("")
+				if($.isEmptyObject(recipies)) {
+					$('#empty_msg').css('display', 'block')
+				}else {
+					$('#empty_msg').css('display', 'none')
+					$.get("../views/components/shopping_item.html", function(shopping_html_string) {
+						$.each(recipies, function(k, v) {
+							shoppingHtmlCopy = String(shopping_html_string)
+							ingredientsString = JSON.stringify(v);
+							ingredientsString = ingredientsString.replace(/'/g, "~").replace(/"/g, "'");
+							shoppingHtmlCopy = shoppingHtmlCopy.replace(/#recipe_id#/g, k).replace('#recipe_ingredients#', ingredientsString)
+							shoppingTable.append(shoppingHtmlCopy)
+						})
+					})
+				}
+			}
+		}
+	</script>
+
+</div>

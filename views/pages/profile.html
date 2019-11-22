@@ -1,0 +1,17 @@
+<div>
+
+	<div id="profile_container"></div>
+
+	<script>
+		$(function() {
+			container = $('#profile_container')
+			container.html('')
+
+			$.get("../views/components/profile_component.html", function(profile_html_string) {
+				container.html(profile_html_string.replace("#profile_userid#", connectedUserId))
+			})
+
+		})
+	</script>
+
+</div>

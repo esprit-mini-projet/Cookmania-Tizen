@@ -1,0 +1,143 @@
+<div id="#news_recipe_id#_newsfeed_card_root" class="newsfeed-card card" style="width: 100%; margin-bottom: 0.5em;" data-recipeid="#news_recipe_id#">
+    <div class="newsfeed-card-header">
+        <table border="0" onclick="goToProfileFeed(this)" data-userid="#user_id#">
+            <tr>
+                <td><img src="#user_img#" class="user-img"/></td>
+                <td style="vertical-align: middle; padding-left: 10px;">
+                    <p style="font-size: 0.7em; line-height: 1;"><b>#user_name#</b></p>
+                    <p class="text-secondary date">#recipe_date#</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <img class="newsfeed-img" src="#recipe_img#" onclick="goToRecipeDetails#news_recipe_id#()">
+    <div class="newsfeed-card-container">
+        <div class="my-rating-4" data-rating="#recipe_rating#"></div>
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <p id="newsfeed-recipe-name"><b>#recipe_name#</b></p>
+                </td>
+                <td style="vertical-align: center; text-align: end;">
+                    <p style="font-size:20px;" >
+                        <i style="font-size: 20px;" onclick="addRecipeToFavorite#news_recipe_id#(this)" id="#news_recipe_id#_outline-heart" class="far fa-heart"></i>
+                        <i style="font-size: 20px; color: #e32929;" onclick="removeRecipeFromFavorite#news_recipe_id#(this)" id="#news_recipe_id#_full-heart" class="fas fa-heart"></i>
+                    </p> 
+                </td>
+            </tr>
+        </table>
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <p style="font-size:17px;" >
+                        <i style="font-size: 13px;" class="fa fa-eye"></i> <span style="font-size: 13px;">#recipe_views#</span>
+                    </p> 
+                </td>
+                <td style="text-align: end;">
+                    <p style="font-size:17px;" >
+                        <span style="font-size: 13px;">5 Days ago</span>
+                    </p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        function goToProfileFeed(view) {
+            navigateToProfile($(view).data('userid'))
+        }
+
+        function goToRecipeDetails#news_recipe_id#() {
+            navigateToRecipeDetails($("##news_recipe_id#_newsfeed_card_root").data("recipeid"))
+        }
+
+        $(function() {
+            recipeId = $('##news_recipe_id#_newsfeed_card_root').data('recipeid')
+            favortiItem = localStorage.getItem("favorite")
+            if(!favortiItem) {
+                favortiItem = "{}"
+            }
+            favoriteJson = JSON.parse(favortiItem.replace(/'/g, '"').replace(/~/g, "'"))
+            if(favoriteJson.hasOwnProperty(recipeId)) {
+                $('##news_recipe_id#_outline-heart').css('display', 'none')
+                $('##news_recipe_id#_full-heart').css('display', 'block')
+            } else {
+                $('##news_recipe_id#_outline-heart').css('display', 'block')
+                $('##news_recipe_id#_full-heart').css('display', 'none')
+            }
+        })
+
+        function addRecipeToFavorite#news_recipe_id#(view) {
+            recipeId = $('##news_recipe_id#_newsfeed_card_root').data('recipeid')
+            $.ajax({
+                url: RECIPES_URL + recipeId
+            }).done(function(recipe) {
+                favortiItem = localStorage.getItem("favorite")
+                if(!favortiItem) {
+                    favortiItem = "{}"
+                }
+                favoriteJson = JSON.parse(favortiItem.replace(/'/g, '"').replace(/~/g, "'"))
+                favoriteJson[recipeId] = recipe
+
+                var favoriteString = JSON.stringify(favoriteJson);
+                favoriteString = favoriteString.replace(/'/g, "~").replace(/"/g, "'");
+
+                localStorage.removeItem("favorite")
+                localStorage.setItem("favorite", favoriteString)
+
+                $(view).hide()
+                $(view).next().show()
+            })
+        }
+
+        function removeRecipeFromFavorite#news_recipe_id#(view) {
+            recipeId = $('##news_recipe_id#_newsfeed_card_root').data('recipeid')
+            favortiItem = localStorage.getItem("favorite")
+            if(!favortiItem) {
+                favortiItem = "{}"
+            }
+            favoriteJson = JSON.parse(favortiItem.replace(/'/g, '"').replace(/~/g, "'"))
+            delete favoriteJson[recipeId]
+
+            var favoriteString = JSON.stringify(favoriteJson);
+            favoriteString = favoriteString.replace(/'/g, "~").replace(/"/g, "'");
+            localStorage.removeItem("favorite")
+            localStorage.setItem("favorite", favoriteString)
+
+            $(view).hide()
+            $(view).prev().show()
+        }
+    </script>
+
+    <style>
+        .newsfeed-card-header,
+        .newsfeed-card-container {
+            padding: 5px 15px;
+        }
+
+        .newsfeed-img {
+            width: 100%;
+            height: 12em;
+            object-fit: cover;
+        }
+
+        .date {
+            margin-top: 0px;
+            font-size: 0.6em;
+        }
+
+        #newsfeed-recipe-name {
+            font-size: 0.7em;
+            margin: 0 !important;
+            padding: 0 !important;
+            line-height: normal;
+        }
+
+        .user-img {
+            height: 40px;
+            width: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    </style>
+</div>

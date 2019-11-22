@@ -1,0 +1,2 @@
+const horizentalCategory = $($.parseHTML("<div id='hr-root'><div class='scrollmenu'></div><style>div.scrollmenu {overflow: auto;white-space: nowrap;}</style><script>$(function() {console.log('Hello :D')})</script></div>"));
+const cardLayout = ""

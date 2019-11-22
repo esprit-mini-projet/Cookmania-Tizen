@@ -1,0 +1,51 @@
+<div class="recipe-card card" onclick="navigateToRecipeDetails('#recipe_id#')">
+    <img src="#img_src#" class="header-img">
+    <div class="recipe-card-container">
+        <div class="recipe_card_rating" data-rating="#recipe_rating#"></div>
+        <p id="recipe-name"><b>#recipe_name#</b></p>
+    </div>
+
+    <style>
+        .recipe-card {
+	        border-radius: 10px;
+            display: inline-block;
+            height: 11em;
+            width: 8em;
+            margin: 0.5em;
+        }
+
+        /* Add some padding inside the card container */
+        .recipe-card-container {
+            padding: 2px 16px;
+        }
+
+        .recipe-card-container p {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.7em;
+        }
+
+        .header-img {
+            border-radius: 10px 10px 0 0;
+            object-fit: cover;
+            height: 8em;
+            width: 8em;
+        }
+    </style>
+
+    <script>
+        $(function() {
+            $(".recipe_card_rating").starRating({
+                totalStars: 5,
+                starSize: 20,
+                emptyColor: 'lightgray',
+                hoverColor: 'salmon',
+                activeColor: 'crimson',
+                useGradient: false,
+                readOnly: true
+            });
+
+        })
+    </script>
+</div> 
