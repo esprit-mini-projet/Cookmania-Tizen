@@ -4,9 +4,6 @@ const pages = [
                "profile"
 			   ];
 
-const networkPlugin = document.getElementById('pluginObjectNetwork');
-const internetConnectionInterval = 500;
-
 (function () {
 	const container = $('#fragment_container');
 	
@@ -30,8 +27,6 @@ const internetConnectionInterval = 500;
 			}
 		}
 	});
-	
-	setInterval("cyclicInternetConnectionCheck", internetConnectionInterval);
 
 	$(".home-tabs a").click(function() {
 		$("li.is-active").removeClass();
@@ -49,70 +44,6 @@ const internetConnectionInterval = 500;
 		login(email, password)
 	}
 }());
-
-function checkConnection() {
-
-	var gatewayStatus = 0,
-  
-	// Get active connection type - wired or wireless.
-  
-	currentInterface = networkPlugin.GetActiveType();
-  
-	// If no active connection.
-  
-	if (currentInterface === -1) {
-  
-	  return false;
-  
-	}
-  
-	// Check Gateway connection of current interface.
-  
-	gatewayStatus = networkPlugin.CheckGateway(currentInterface);
-  
-	// If not connected or error.
-  
-	if (gatewayStatus !== 1) {
-  
-	  return false;
-  
-	}
-  
-	// Everything went OK.
-  
-	return true;
-  
-  }
-
-function cyclicInternetConnectionCheck() {
-
-	if(!checkConnection() ){
-  
-	  // no internet connection
-		console.log('no internet')
-	  if(!internetConnectionPopup.isShown){
-  
-		internetConnectionPopup.show();
-  
-		Player.stop();
-  
-	  }
-  
-	} else {
-  
-	  // if error message was shown, it should be returned back to normal
-		console.log('internet')
-	  if(internetConnectionPopup.isShown){
-  
-		internetConnectionPopup.hide();
-  
-		//  return to normal screen
-  
-	  }
-  
-	}
-  
-  }
 
 function navigateToCategory(categoryName) {
 	$.ajax({
